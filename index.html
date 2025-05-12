@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>溫度對反應速率的影響</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .lab-setup {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        .beaker {
+            width: 150px;
+            height: 200px;
+            position: relative;
+            border-radius: 0 0 20px 20px;
+            border: 3px solid #3498db;
+            border-top: none;
+            background-color: rgba(52, 152, 219, 0.1);
+            overflow: hidden;
+        }
+        .beaker::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 20px 20px 0 0;
+        }
+        .beaker-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .particle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s linear;
+        }
+        .particle.a {
+            background-color: #e7c83c;
+        }
+        .particle.b {
+            background-color: #2ecc71;
+        }
+        .particle.c {
+            background-color: #9b59b6;
+            
+            transform: scale(1.5);
+        }
+        .thermometer {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 20px;
+            height: 80px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            border: 2px solid #bdc3c7;
+        }
+        .mercury {
+            position: absolute;
+            bottom: 5px;
+            left: 3px;
+            width: 14px;
+            height: 20px;
+            background-color: #e74c3c;
+            border-radius: 7px;
+            transition: height 0.5s ease;
+        }
+        .temp-display {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        .slider-container {
+            margin: 20px auto;
+            width: 80%;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #3498db, #e74c3c);
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .explanation {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .reaction-count {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #7f8c8d;
+        }
+        .comparison {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fffde7;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>溫度對反應速率的影響</h1>
+        <p class="subtitle">動畫演示 - 國中化學</p>
+        
+        <div class="lab-setup">
+            <div class="beaker" id="beaker1">
+                <div class="beaker-label">低溫反應</div>
+                <div class="thermometer">
+                    <div class="mercury" id="mercury1"></div>
+                    <div class="temp-display" id="temp1">25°C</div>
+                </div>
+                <div class="reaction-count">反應次數: <span id="count1">0</span></div>
+            </div>
+            
+            <div class="beaker" id="beaker2">
+                <div class="beaker-label">高溫反應</div>
+                <div class="thermometer">
+                    <div class="mercury" id="mercury2"></div>
+                    <div class="temp-display" id="temp2">25°C</div>
+                </div>
+                <div class="reaction-count">反應次數: <span id="count2">0</span></div>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <label for="temp-slider">調整溫度: <span id="temp-value">25</span>°C</label>
+            <input type="range" id="temp-slider" min="10" max="80" value="25" step="5">
+        </div>
+        
+        <div class="controls">
+            <button id="start-btn">開始反應</button>
+            <button id="reset-btn">重置實驗</button>
+            <button id="compare-btn">比較反應速率</button>
+        </div>
+        
+        <div class="comparison" id="comparison" style="display: none;">
+            <h3>反應速率比較</h3>
+            <p>低溫反應速率: <span id="rate1">0</span> 次/秒</p>
+            <p>高溫反應速率: <span id="rate2">0</span> 次/秒</p>
+            <p>速率比 (高溫/低溫): <span id="rate-ratio">0</span></p>
+        </div>
+        
+        <div class="explanation">
+            <h3>科學原理說明:</h3>
+            <p>溫度升高會使化學反應速率加快，主要原因有兩個：</p>
+            <ol>
+                <li><strong>碰撞頻率增加</strong>：溫度升高時，粒子運動速度加快，單位時間內的碰撞次數增加。</li>
+                <li><strong>有效碰撞比例提高</strong>：更多粒子具有足夠的能量（達到或超過活化能）來發生有效碰撞。</li>
+            </ol>
+            <p>根據阿瑞尼士方程式，溫度每升高10°C，反應速率大約會變為原來的2-4倍。</p>
+            <p>這個動畫展示了相同條件下，不同溫度時粒子碰撞和反應發生的頻率差異。</p>
+        </div>
+    </div>
+
+    <script>
+        // 獲取DOM元素
+        const beaker1 = document.getElementById('beaker1');
+        const beaker2 = document.getElementById('beaker2');
+        let mercury1 = document.getElementById('mercury1');
+        let mercury2 = document.getElementById('mercury2');
+        let temp1Display = document.getElementById('temp1');
+        let temp2Display = document.getElementById('temp2');
+        const tempSlider = document.getElementById('temp-slider');
+        const tempValue = document.getElementById('temp-value');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const compareBtn = document.getElementById('compare-btn');
+        let count1Display = document.getElementById('count1');
+        let count2Display = document.getElementById('count2');
+        const comparison = document.getElementById('comparison');
+        const rate1Display = document.getElementById('rate1');
+        const rate2Display = document.getElementById('rate2');
+        const rateRatioDisplay = document.getElementById('rate-ratio');
+        
+        // 實驗變量
+        let temp1 = 25;
+        let temp2 = 25;
+        let isExperimentRunning = false;
+        let reactionCount1 = 0;
+        let reactionCount2 = 0;
+        let startTime1, startTime2;
+        let animationId1, animationId2;
+        
+        // 粒子數量和位置
+        const particles1 = [];
+        const particles2 = [];
+        const particleCount = 15;
+        
+        // 初始化燒杯中的粒子
+        function initParticles() {
+            // 清空現有粒子
+            beaker1.innerHTML = '<div class="beaker-label">低溫反應</div><div class="thermometer"><div class="mercury" id="mercury1"></div><div class="temp-display" id="temp1">25°C</div></div><div class="reaction-count">反應次數: <span id="count1">0</span></div>';
+            beaker2.innerHTML = '<div class="beaker-label">高溫反應</div><div class="thermometer"><div class="mercury" id="mercury2"></div><div class="temp-display" id="temp2">25°C</div></div><div class="reaction-count">反應次數: <span id="count2">0</span></div>';
+            
+            // 重新獲取元素
+            mercury1 = document.getElementById('mercury1');
+            mercury2 = document.getElementById('mercury2');
+            temp1Display = document.getElementById('temp1');
+            temp2Display = document.getElementById('temp2');
+            count1Display = document.getElementById('count1');
+            count2Display = document.getElementById('count2');
+            
+            particles1.length = 0;
+            particles2.length = 0;
+            reactionCount1 = 0;
+            reactionCount2 = 0;
+            count1Display.textContent = '0';
+            count2Display.textContent = '0';
+            
+            // 創建粒子
+            for (let i = 0; i < particleCount; i++) {
+                createParticle(beaker1, particles1, i % 2 === 0 ? 'a' : 'b');
+                createParticle(beaker2, particles2, i % 2 === 0 ? 'a' : 'b');
+            }
+            
+            updateTemperatures();
+            
+            // 自動開始粒子運動（但不開始反應計數）
+            isExperimentRunning = true;
+            animateParticles(particles1, beaker1, temp1, true);
+            animateParticles(particles2, beaker2, temp2, false);
+            isExperimentRunning = false;
+        }
+        
+        // 創建單個粒子
+        function createParticle(beaker, particles, type) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${type}`;
+            
+            // 隨機位置 (避免太靠近邊緣)
+            const beakerRect = beaker.getBoundingClientRect();
+            const maxX = beakerRect.width - 20;
+            const maxY = beakerRect.height - 50;
+            
+            const x = 20 + Math.random() * (maxX - 40);
+            const y = 20 + Math.random() * (maxY - 40);
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            // 初始速度
+            const speed = 0.5 + Math.random() * 1.5;
+            const angle = Math.random() * Math.PI * 2;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            
+            beaker.appendChild(particle);
+            particles.push({
+                element: particle,
+                x, y,
+                vx, vy,
+                type
+            });
+        }
+        
+        // 更新溫度顯示
+        function updateTemperatures() {
+            // 根據溫度調整水銀柱高度
+            const mercuryHeight1 = 5 + (temp1 - 10) * 1.07;
+            const mercuryHeight2 = 5 + (temp2 - 10) * 1.07;
+            
+            mercury1.style.height = `${mercuryHeight1}px`;
+            mercury2.style.height = `${mercuryHeight2}px`;
+            
+            temp1Display.textContent = `${temp1}°C`;
+            temp2Display.textContent = `${temp2}°C`;
+        }
+        
+        // 粒子動畫
+        function animateParticles(particles, beaker, temp, isBeaker1) {
+            const beakerRect = beaker.getBoundingClientRect();
+            const beakerWidth = beakerRect.width;
+            const beakerHeight = beakerRect.height - 30; // 扣除底部標籤空間
+            
+            // 溫度影響粒子速度
+            const speedFactor = 0.2 + (temp / 80) * 1.8;
+            
+            particles.forEach((p, i) => {
+                // 隨機運動
+                if (Math.random() < 0.05) {
+                    p.vx = (Math.random() - 0.5) * speedFactor * 2;
+                    p.vy = (Math.random() - 0.5) * speedFactor * 2;
+                }
+                
+                // 更新位置
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                // 邊界檢查
+                if (p.x < 5) {
+                    p.x = 5;
+                    p.vx *= -0.8;
+                }
+                if (p.x > beakerWidth - 17) {
+                    p.x = beakerWidth - 17;
+                    p.vx *= -0.8;
+                }
+                if (p.y < 5) {
+                    p.y = 5;
+                    p.vy *= -0.8;
+                }
+                if (p.y > beakerHeight - 17) {
+                    p.y = beakerHeight - 17;
+                    p.vy *= -0.8;
+                }
+                
+                // 應用新位置
+                p.element.style.left = `${p.x}px`;
+                p.element.style.top = `${p.y}px`;
+                
+                // 檢查碰撞和反應（僅在實驗運行時）
+                if (isExperimentRunning) {
+                    particles.forEach((p2, j) => {
+                        if (i < j && p.type !== p2.type) { // 不同類型粒子可能反應
+                            const dx = p.x - p2.x;
+                            const dy = p.y - p2.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 15) { // 碰撞距離
+                                // 反應概率與溫度相關
+                                const reactionProbability = 0.01 + (temp / 80) * 0.09;
+                                
+                                if (Math.random() < reactionProbability) {
+                                    createReactionProduct(beaker, p, p2, isBeaker1);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            if (isBeaker1) {
+                animationId1 = requestAnimationFrame(() => animateParticles(particles1, beaker1, temp1, true));
+            } else {
+                animationId2 = requestAnimationFrame(() => animateParticles(particles2, beaker2, temp2, false));
+            }
+        }
+        
+        // 創建反應產物
+        function createReactionProduct(beaker, p1, p2, isBeaker1) {
+            const product = document.createElement('div');
+            product.className = 'particle c';
+            product.style.left = `${(p1.x + p2.x) / 2}px`;
+            product.style.top = `${(p1.y + p2.y) / 2}px`;
+            beaker.appendChild(product);
+            
+            // 更新反應計數
+            if (isBeaker1) {
+                reactionCount1++;
+                count1Display.textContent = reactionCount1;
+            } else {
+                reactionCount2++;
+                count2Display.textContent = reactionCount2;
+            }
+            
+            // 顯示然後淡出產物
+            setTimeout(() => {
+                product.style.opacity = '1';
+                product.style.transform = 'scale(1)';
+            }, 10);
+            
+            setTimeout(() => {
+                product.style.opacity = '0';
+                product.style.transform = 'scale(0)';
+                setTimeout(() => beaker.removeChild(product), 300);
+            }, 1000);
+        }
+        
+        // 開始實驗（開始計數反應）
+        function startExperiment() {
+            if (isExperimentRunning) return;
+            
+            isExperimentRunning = true;
+            startTime1 = Date.now();
+            startTime2 = Date.now();
+            startBtn.textContent = "實驗進行中...";
+            startBtn.style.backgroundColor = "#e74c3c";
+        }
+        
+        // 重置實驗
+        function resetExperiment() {
+            isExperimentRunning = false;
+            cancelAnimationFrame(animationId1);
+            cancelAnimationFrame(animationId2);
+            
+            startBtn.textContent = "開始反應";
+            startBtn.style.backgroundColor = "#3498db";
+            comparison.style.display = "none";
+            
+            initParticles();
+        }
+        
+        // 比較反應速率
+        function compareRates() {
+            if (!isExperimentRunning) return;
+            
+            const elapsedTime1 = (Date.now() - startTime1) / 1000;
+            const elapsedTime2 = (Date.now() - startTime2) / 1000;
+            
+            const rate1 = reactionCount1 / elapsedTime1;
+            const rate2 = reactionCount2 / elapsedTime2;
+            const ratio = rate2 / rate1;
+            
+            rate1Display.textContent = rate1.toFixed(2);
+            rate2Display.textContent = rate2.toFixed(2);
+            rateRatioDisplay.textContent = ratio.toFixed(2);
+            
+            comparison.style.display = "block";
+        }
+        
+        // 事件監聽
+        startBtn.addEventListener('click', startExperiment);
+        resetBtn.addEventListener('click', resetExperiment);
+        compareBtn.addEventListener('click', compareRates);
+        
+        tempSlider.addEventListener('input', function() {
+            temp1 = 25;
+            temp2 = parseInt(this.value);
+            tempValue.textContent = temp2;
+            updateTemperatures();
+        });
+        
+        // 初始化
+        initParticles();
+    </script>
+</body>
+</html>
